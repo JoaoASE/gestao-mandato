@@ -1,0 +1,104 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Candidate {
+  id            String          @id
+  name          String
+  cityId        String
+  slug          String          @unique
+  City          City            @relation(fields: [cityId], references: [id])
+  CitizenDemand CitizenDemand[]
+}
+
+model CitizenDemand {
+  id             String       @id
+  candidateId    String
+  neighborhoodId String
+  title          String
+  description    String
+  category       String
+  sentiment      String
+  latitude       Float
+  longitude      Float
+  status         String       @default("PENDENTE")
+  createdAt      DateTime     @default(now())
+  Candidate      Candidate    @relation(fields: [candidateId], references: [id])
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}
+
+model City {
+  id           String         @id
+  name         String
+  state        String
+  ibgeCode     String         @unique
+  latitude     Float
+  longitude    Float
+  Candidate    Candidate[]
+  Neighborhood Neighborhood[]
+}
+
+model ElectoralResult {
+  id             String       @id
+  neighborhoodId String
+  year           Int
+  candidateName  String?
+  votesCount     Int
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}
+
+model Neighborhood {
+  id                 String               @id
+  name               String
+  cityId             String
+  totalVoters        Int                  @default(0)
+  averageIncome      Float?
+  leisureAreasCount  Int                  @default(0)
+  securityIncidents  Int                  @default(0)
+  sanitationCoverage Float?
+  transportLines     Int                  @default(0)
+  CitizenDemand      CitizenDemand[]
+  ElectoralResult    ElectoralResult[]
+  ElectionProjection ElectionProjection[]
+  City               City                 @relation(fields: [cityId], references: [id])
+  Metrics            NeighborhoodMetric[]
+  HealthFacilities   HealthFacility[]
+}
+
+model ElectionProjection {
+  id             String       @id @default(uuid())
+  neighborhoodId String
+  year           Int          @default(2022)
+  position       String // "Deputado Estadual", "Deputado Federal", "Governador", "Senador", "Presidente"
+  candidateName  String
+  projectedVotes Int // Votos projetados no bairro
+  confidence     Float? // Nível de confiança da previsão (ex: 85.5)
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}
+
+model NeighborhoodMetric {
+  id             String       @id @default(uuid())
+  neighborhoodId String
+  year           Int
+  month          Int?
+  metricType     String // Ex: "ROUBOS", "RECLAMACOES_SAUDE", "FALTA_AGUA"
+  value          Float
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}
+
+model HealthFacility {
+  id               String       @id @default(uuid())
+  neighborhoodId   String
+  name             String // Ex: "UAI Martins"
+  type             String // Ex: "UAI", "UBS", "Hospital"
+  latitude         Float
+  longitude        Float
+  currentQueueSize Int? // Atualizado dinamicamente via cronjob ou API
+  averageWaitTime  Int? // Tempo médio em minutos
+  Neighborhood     Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}

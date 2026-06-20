@@ -1,0 +1,57 @@
+[{
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "25 a 34 anos",
+  "total_pessoas": "118700"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "35 a 44 anos",
+  "total_pessoas": "115245"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "45 a 54 anos",
+  "total_pessoas": "90431"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "55 a 64 anos",
+  "total_pessoas": "72611"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "65 anos ou mais",
+  "total_pessoas": "65232"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "20 a 24 anos",
+  "total_pessoas": "56776"
+}, {
+  "alfabetizacao": "Alfabetizadas",
+  "grupo_idade": "15 a 19 anos",
+  "total_pessoas": "47022"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "65 anos ou mais",
+  "total_pessoas": "7934"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "55 a 64 anos",
+  "total_pessoas": "3127"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "45 a 54 anos",
+  "total_pessoas": "2335"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "35 a 44 anos",
+  "total_pessoas": "1569"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "25 a 34 anos",
+  "total_pessoas": "938"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "20 a 24 anos",
+  "total_pessoas": "426"
+}, {
+  "alfabetizacao": "Não alfabetizadas",
+  "grupo_idade": "15 a 19 anos",
+  "total_pessoas": "383"
+}]
