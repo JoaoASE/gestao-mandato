@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useUser, useClerk } from '@clerk/nextjs'
 import {
@@ -40,12 +40,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
 
-  const candidateName = user?.firstName || user?.fullName || 'Candidato'
+  const [candidateName, setCandidateName] = useState('...')
+  useEffect(() => {
+    if (user) setCandidateName(user.firstName || user.fullName || 'Candidato')
+  }, [user])
 
   const isDashboard = pathname?.includes('/dashboard')
 
   return (
-    <div className="flex h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans bg-grid">
+    <div className="flex h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans bg-grid" suppressHydrationWarning>
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -168,8 +171,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <h1 className="text-sm font-semibold text-slate-200">
                 {isDashboard ? 'Mapa Eleitoral' : `Bom dia, ${candidateName} 👋`}
               </h1>
-              <p className="text-xs text-slate-600 hidden sm:block">
-                Uberlândia · {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+              <p className="text-xs text-slate-600 hidden sm:block" suppressHydrationWarning>
+                Uberlândia · {typeof window !== 'undefined' ? new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }) : ''}
               </p>
             </div>
           </div>
