@@ -9,9 +9,13 @@ datasource db {
 
 model Candidate {
   id            String          @id
+  clerkUserId   String          @unique // vinculado ao usuário Clerk
   name          String
   cityId        String
   slug          String          @unique
+  plan          String          @default("candidato") // "candidato" | "campanha" | "partido"
+  planExpiresAt DateTime?
+  createdAt     DateTime        @default(now())
   City          City            @relation(fields: [cityId], references: [id])
   CitizenDemand CitizenDemand[]
 }
@@ -56,28 +60,38 @@ model Neighborhood {
   id                 String               @id
   name               String
   cityId             String
-  totalVoters        Int                  @default(0)
+  totalVoters        Int?                 // null = dado não disponível
   averageIncome      Float?
-  leisureAreasCount  Int                  @default(0)
-  securityIncidents  Int                  @default(0)
+  leisureAreasCount  Int?
+  securityIncidents  Int?
   sanitationCoverage Float?
-  transportLines     Int                  @default(0)
+  transportLines     Int?
   CitizenDemand      CitizenDemand[]
   ElectoralResult    ElectoralResult[]
   ElectionProjection ElectionProjection[]
   City               City                 @relation(fields: [cityId], references: [id])
   Metrics            NeighborhoodMetric[]
   HealthFacilities   HealthFacility[]
+  LeisureAreas       LeisureArea[]
+}
+
+model LeisureArea {
+  id             String       @id @default(uuid())
+  name           String
+  type           String       // "PRACA" | "PARQUE"
+  street         String?
+  neighborhoodId String
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
 }
 
 model ElectionProjection {
   id             String       @id @default(uuid())
   neighborhoodId String
   year           Int          @default(2022)
-  position       String // "Deputado Estadual", "Deputado Federal", "Governador", "Senador", "Presidente"
+  position       String
   candidateName  String
-  projectedVotes Int // Votos projetados no bairro
-  confidence     Float? // Nível de confiança da previsão (ex: 85.5)
+  projectedVotes Int
+  confidence     Float?
   Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
 }
 
@@ -86,7 +100,7 @@ model NeighborhoodMetric {
   neighborhoodId String
   year           Int
   month          Int?
-  metricType     String // Ex: "ROUBOS", "RECLAMACOES_SAUDE", "FALTA_AGUA"
+  metricType     String
   value          Float
   Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
 }
@@ -94,11 +108,11 @@ model NeighborhoodMetric {
 model HealthFacility {
   id               String       @id @default(uuid())
   neighborhoodId   String
-  name             String // Ex: "UAI Martins"
-  type             String // Ex: "UAI", "UBS", "Hospital"
+  name             String
+  type             String
   latitude         Float
   longitude        Float
-  currentQueueSize Int? // Atualizado dinamicamente via cronjob ou API
-  averageWaitTime  Int? // Tempo médio em minutos
+  currentQueueSize Int?
+  averageWaitTime  Int?
   Neighborhood     Neighborhood @relation(fields: [neighborhoodId], references: [id])
 }
