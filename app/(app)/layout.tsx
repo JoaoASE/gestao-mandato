@@ -166,8 +166,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             collapsed={collapsed}
           />
           <NavItem icon={FileText} label="Demandas"
-            active={false}
-            onClick={() => { router.push('/dashboard'); setMobileOpen(false) }}
+            active={pathname === '/demandas'}
+            onClick={() => { router.push('/demandas'); setMobileOpen(false) }}
             collapsed={collapsed}
           />
           <NavItem icon={BarChart3} label="Previsões"
@@ -184,8 +184,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             collapsed={collapsed}
           />
           <NavItem icon={Shield} label="Segurança"
-            active={false}
-            onClick={() => {}}
+            active={pathname === '/seguranca'}
+            onClick={() => { router.push('/seguranca'); setMobileOpen(false) }}
             collapsed={collapsed}
           />
           <NavItem icon={Star} label="Relatórios"

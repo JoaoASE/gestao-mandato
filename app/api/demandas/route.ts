@@ -36,3 +36,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Erro desconhecido' }, { status: 500 })
   }
 }
+
+export async function PATCH(request: Request): Promise<Response> {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
+    const { status } = await request.json()
+    const updated = await prisma.citizenDemand.update({ where: { id }, data: { status } })
+    return NextResponse.json(updated)
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}
