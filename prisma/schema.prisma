@@ -44,6 +44,7 @@ model City {
   latitude     Float
   longitude    Float
   Candidate    Candidate[]
+  CrimeOccurrences CrimeOccurrence[]
   Neighborhood Neighborhood[]
 }
 
@@ -73,6 +74,7 @@ model Neighborhood {
   Metrics            NeighborhoodMetric[]
   HealthFacilities   HealthFacility[]
   LeisureAreas       LeisureArea[]
+  CrimeOccurrences   CrimeOccurrence[]
 }
 
 model LeisureArea {
@@ -115,4 +117,22 @@ model HealthFacility {
   currentQueueSize Int?
   averageWaitTime  Int?
   Neighborhood     Neighborhood @relation(fields: [neighborhoodId], references: [id])
+}
+
+model CrimeOccurrence {
+  id             String       @id @default(uuid())
+  neighborhoodId String
+  cityId         String
+  year           Int
+  month          Int          // 1-12
+  crimeType      String       // "ROUBO" | "FURTO" | "HOMICIDIO" | "TRAFICO" | "LESAO" | "ESTUPRO" | "OUTROS"
+  count          Int
+  source         String       @default("SSP-MG")
+  createdAt      DateTime     @default(now())
+  Neighborhood   Neighborhood @relation(fields: [neighborhoodId], references: [id])
+  City           City         @relation(fields: [cityId], references: [id])
+
+  @@unique([neighborhoodId, year, month, crimeType])
+  @@index([neighborhoodId, year, month])
+  @@index([cityId, year, month])
 }
