@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import csv from 'csv-parser';
 
-export async function GET(request: Request) {
+export async function GET(request: Request): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const file = searchParams.get('file');
   const page = parseInt(searchParams.get('page') || '1');
@@ -19,7 +19,6 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Arquivo inválido' }, { status: 400 });
   }
 
-  // Prevent directory traversal
   const safeFile = path.basename(file);
   const filePath = path.join(process.cwd(), safeFile);
 
@@ -31,29 +30,28 @@ export async function GET(request: Request) {
   let totalRows = 0;
   const skip = (page - 1) * limit;
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => {
     fs.createReadStream(filePath)
       .pipe(csv())
       .on('data', (data) => {
-        // Filter logic
         let matches = true;
         if (search) {
-          matches = Object.values(data).some((val: any) => 
+          matches = Object.values(data).some((val: any) =>
             String(val).toLowerCase().includes(search)
           );
         }
 
         if (matches && Object.keys(filters).length > 0) {
-           for (const key of Object.keys(filters)) {
-              if (filters[key]) {
-                 const cellVal = String(data[key] || '').toLowerCase();
-                 const filterVal = filters[key].toLowerCase();
-                 if (!cellVal.includes(filterVal)) {
-                    matches = false;
-                    break;
-                 }
+          for (const key of Object.keys(filters)) {
+            if (filters[key]) {
+              const cellVal = String(data[key] || '').toLowerCase();
+              const filterVal = filters[key].toLowerCase();
+              if (!cellVal.includes(filterVal)) {
+                matches = false;
+                break;
               }
-           }
+            }
+          }
         }
 
         if (matches) {
