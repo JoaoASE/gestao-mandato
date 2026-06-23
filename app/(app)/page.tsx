@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { LogoMark } from '@/components/Logo'
 import { useRouter } from 'next/navigation'
 import {
   Map, BarChart3, FileText, TrendingUp, TrendingDown,

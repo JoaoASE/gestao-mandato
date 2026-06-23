@@ -1,10 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Logo, LogoMark } from '@/components/Logo'
 import { useRouter, usePathname } from 'next/navigation'
 import { useUser, useClerk } from '@clerk/nextjs'
 import {
-  Zap, Activity, Map, FileText, BarChart3, Bot,
+  Activity, Map, FileText, BarChart3, Bot,
   Shield, Star, LogOut, ChevronRight, Bell, Menu, X, Send
 } from 'lucide-react'
 
@@ -118,15 +119,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Logo */}
         <div className="p-4 border-b border-white/[0.04] flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-600 to-amber-500 flex items-center justify-center shrink-0">
-              <Zap size={14} className="text-white" />
-            </div>
-            {!collapsed && (
-              <span className="font-bold text-sm bg-gradient-to-r from-purple-400 to-amber-400 bg-clip-text text-transparent truncate">
-                Oráculo
-              </span>
-            )}
+          <div className="flex items-center gap-2 min-w-0 cursor-pointer" onClick={() => router.push('/')}>
+            {collapsed
+              ? <LogoMark size={30} />
+              : <Logo size={30} showText={true} />
+            }
           </div>
           <button
             onClick={() => setCollapsed(!collapsed)}
@@ -210,9 +207,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Topbar */}
         <header className="h-14 border-b border-white/[0.04] flex items-center justify-between px-4 md:px-6 shrink-0 bg-[#080808]/80 backdrop-blur-sm">
-          <div className="flex items-center gap-3 pl-8 md:pl-0">
+          <div className="flex items-center gap-3 pl-10 md:pl-0">
+            {/* Logo on mobile topbar */}
+            <div className="md:hidden" onClick={() => router.push('/')}>
+              <LogoMark size={28} />
+            </div>
             <div>
-              <h1 className="text-sm font-semibold text-slate-200">
+              <h1 className="text-sm font-semibold text-slate-200 hidden sm:block">
                 {isDashboard ? 'Mapa Eleitoral' : `Bom dia, ${candidateName} 👋`}
               </h1>
               <p className="text-xs text-slate-600 hidden sm:block" suppressHydrationWarning>
