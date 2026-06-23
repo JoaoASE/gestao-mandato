@@ -1,6 +1,7 @@
 'use client'
 
 import { SignIn } from '@clerk/nextjs'
+import Image from 'next/image'
 import { Logo } from '@/components/Logo'
 
 export default function LoginPage() {
@@ -38,9 +39,11 @@ export default function LoginPage() {
         </div>
 
         <div className="relative z-10 space-y-8">
-          {/* Big logo mark */}
+          {/* Big logo — imagem original */}
           <div className="flex justify-center">
-            <Logo size={180} showText={false} />
+            <div style={{ width: 220, height: 220, position: 'relative', mixBlendMode: 'screen', filter: 'saturate(1.1) brightness(1.05)' }}>
+              <Image src="/logo-oraculo.png" alt="Oráculo" fill style={{ objectFit: 'contain' }} priority />
+            </div>
           </div>
 
           <div>
