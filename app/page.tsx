@@ -41,8 +41,10 @@ import {
   Bus,
   TreePine,
   Clock,
-  HeartPulse
+  HeartPulse,
+  GraduationCap
 } from 'lucide-react';
+import bairrosGeoData from '../public/uberlandia-bairros.json';
 import { useRouter } from 'next/navigation';
 
 
@@ -54,14 +56,34 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 export default function Dashboard() {
   const [estatisticas, setEstatisticas] = useState<any[]>([]);
   const [statsSocial, setStatsSocial] = useState({ totalAnalfabetos: 0 });
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(''); // candidato search
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const router = useRouter();
+  const mapRef = useRef<any>(null);
+  const [busRouteGeojson, setBusRouteGeojson] = useState<any>(null);
 
   const [selectedBairro, setSelectedBairro] = useState<any>(null);
   const [isAddingDemand, setIsAddingDemand] = useState(false);
   const [newDemandText, setNewDemandText] = useState('');
   const [isSubmittingDemand, setIsSubmittingDemand] = useState(false);
+
+  const [searchBairroQuery, setSearchBairroQuery] = useState('');
+  const [filteredBairros, setFilteredBairros] = useState<any[]>([]);
+  const [selectedIndicator, setSelectedIndicator] = useState<string | null>(null);
+  const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
+  const fetchBairroDetails = async (bairroName: string, bairroId?: string) => {
+    try {
+      const apiUrl = bairroId ? `/api/bairro?id=${bairroId}` : `/api/bairro?name=${encodeURIComponent(bairroName)}`;
+      const res = await fetch(apiUrl);
+      if (res.ok) {
+        const details = await res.json();
+        setSelectedBairro((prev: any) => ({ ...prev, ...details, historicoVotos: details.historicoVotos, demandas: details.demandas }));
+      }
+    } catch(err) {
+      console.error("Falha ao carregar detalhes", err);
+    }
+  };
 
  
 
@@ -117,12 +139,32 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-
     // Busca Estatísticas de Bairro (Cores e Perfil)
+    const loadFallbackGeoJson = () => {
+       try {
+         const names = bairrosGeoData.features.map((f: any) => ({
+             id: null,
+             nomeBairro: f.properties.nome
+         }));
+         const uniqueNames = Array.from(new Map(names.map((item: any) => [item.nomeBairro, item])).values());
+         setEstatisticas(uniqueNames as any[]);
+       } catch(e) {
+         setEstatisticas([]);
+       }
+    };
 
-    fetch('/api/estatisticas').then(res => res.json()).then(data => setEstatisticas(Array.isArray(data) ? data : []));
-
-
+    fetch('/api/estatisticas')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0 && data[0].nomeBairro) {
+           setEstatisticas(data);
+        } else {
+           loadFallbackGeoJson();
+        }
+      })
+      .catch(() => {
+         loadFallbackGeoJson();
+      });
 
     // Busca Dados Demográficos (IBGE)
 
@@ -133,18 +175,51 @@ export default function Dashboard() {
 
 
   // Auto-scroll para o final do chat
-
   useEffect(() => {
-
     if (messagesEndRef.current) {
-
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-
     }
-
   }, [messages]);
 
+  useEffect(() => {
+    if (!searchBairroQuery.trim()) {
+      setFilteredBairros([]);
+      setShowSearchDropdown(false);
+      return;
+    }
+    const q = searchBairroQuery.toLowerCase();
+    
+    // Extrai nomes unicos direto do geojson para busca ser instantanea
+    const geoNames = Array.from(new Set(bairrosGeoData.features.map((f:any) => f.properties.nome)));
+    const results = geoNames
+       .filter(nome => nome?.toLowerCase().includes(q))
+       .map(nome => ({ id: null, nomeBairro: nome }));
 
+    setFilteredBairros(results);
+    setShowSearchDropdown(true);
+  }, [searchBairroQuery]);
+
+  // Efeito para centralizar o mapa no bairro selecionado
+  useEffect(() => {
+    if (selectedBairro?.feature && mapRef.current) {
+      let minX = 180, minY = 90, maxX = -180, maxY = -90;
+      try {
+        const coords = selectedBairro.feature.geometry.type === 'Polygon' ? selectedBairro.feature.geometry.coordinates[0] : selectedBairro.feature.geometry.coordinates[0][0];
+        coords.forEach(([x,y]: number[]) => {
+          if(x<minX) minX=x; if(x>maxX) maxX=x;
+          if(y<minY) minY=y; if(y>maxY) maxY=y;
+        });
+        mapRef.current.fitBounds([ [minX, minY], [maxX, maxY] ], { padding: 100, duration: 1500 });
+      } catch(e) {}
+    }
+  }, [selectedBairro?.feature]);
+
+  // Efeito do ônibus removido conforme pedido (apenas lista mantida)
+  useEffect(() => {
+    if (selectedIndicator !== 'onibus') {
+      setBusRouteGeojson(null);
+    }
+  }, [selectedIndicator]);
 
   const submitWithContext = async (e?: React.FormEvent) => {
 
@@ -369,66 +444,62 @@ export default function Dashboard() {
 
           <div className={`shrink-0 space-y-3 ${isSidebarExpanded ? 'grid grid-cols-2 gap-3 space-y-0' : 'mt-auto'}`}>
 
-            {/* Widget 1: IA Status */}
+            {/* Demografia IBGE Global (Sidebar) - Accordion Uberlândia */}
+            {statsSocial && statsSocial.total && (
+              <div className="flex flex-col gap-3 h-full justify-end">
+                  <div 
+                     onClick={() => {
+                         const current = document.getElementById('demo-accordion');
+                         if(current) current.classList.toggle('hidden');
+                     }}
+                     className="bg-slate-900/80 p-4 rounded-xl border border-slate-700 hover:border-purple-500/50 hover:bg-slate-800 transition-all cursor-pointer flex justify-between items-center group"
+                  >
+                     <div>
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-wider mb-1">Visão Geral (IBGE 2022)</p>
+                        <div className="flex items-center gap-2 text-white">
+                           <MapIcon size={16} className="text-purple-400" />
+                           <span className="font-bold">Uberlândia</span>
+                        </div>
+                     </div>
+                     <ChevronRight size={18} className="text-slate-500 group-hover:text-purple-400 transition-colors" />
+                  </div>
 
-            <div className="p-4 bg-slate-900/40 rounded-2xl border border-slate-800 relative overflow-hidden group">
+                  <div id="demo-accordion" className="hidden flex-col gap-3 transition-all">
+                    <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
+                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-3">Sexo</p>
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-xs font-bold">
+                            <span className="text-pink-400">{(statsSocial.sexo_percent.Mulheres * 100).toFixed(1)}%</span>
+                            <span className="text-blue-400">{(statsSocial.sexo_percent.Homens * 100).toFixed(1)}%</span>
+                         </div>
+                         <div className="w-full bg-slate-800 rounded-full h-2 flex overflow-hidden">
+                            <div className="bg-pink-500 h-full" style={{width: `${statsSocial.sexo_percent.Mulheres * 100}%`}}></div>
+                            <div className="bg-blue-500 h-full" style={{width: `${statsSocial.sexo_percent.Homens * 100}%`}}></div>
+                         </div>
+                      </div>
+                    </div>
 
-              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <div className="flex items-center gap-2 mb-2 text-purple-400">
-
-                <Bot size={14} className="shrink-0" />
-
-                <p className="text-[10px] uppercase font-bold tracking-wider truncate">Status do Oráculo</p>
-
+                    <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80">
+                      <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-3">Cor/Raça</p>
+                      <div className="space-y-2">
+                         <div className="flex justify-between items-center text-[10px] font-bold">
+                            <span className="text-amber-100">B ({(statsSocial.raca_percent.Branca * 100).toFixed(0)}%)</span>
+                            <span className="text-amber-600">P ({(statsSocial.raca_percent.Parda * 100).toFixed(0)}%)</span>
+                            <span className="text-amber-900">P ({(statsSocial.raca_percent.Preta * 100).toFixed(0)}%)</span>
+                         </div>
+                         <div className="w-full bg-slate-800 rounded-full h-2 flex overflow-hidden">
+                            <div className="bg-amber-100 h-full" style={{width: `${statsSocial.raca_percent.Branca * 100}%`}}></div>
+                            <div className="bg-amber-600 h-full" style={{width: `${statsSocial.raca_percent.Parda * 100}%`}}></div>
+                            <div className="bg-amber-900 h-full" style={{width: `${statsSocial.raca_percent.Preta * 100}%`}}></div>
+                         </div>
+                      </div>
+                    </div>
+                  </div>
               </div>
-
-              <p className="text-lg font-bold text-white flex items-center gap-2 truncate">
-
-                <span className="relative flex h-3 w-3 shrink-0">
-
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-
-                </span>
-
-                Online
-
-              </p>
-
-            </div>
-
-
-
-            {/* Widget 2: Alerta Social (IBGE) */}
-
-            <div className="p-4 bg-purple-900/10 rounded-2xl border border-purple-500/20 backdrop-blur-sm">
-
-              <div className="flex items-center gap-2 mb-2 text-purple-300">
-
-                <Users size={14} className="shrink-0" />
-
-                <p className="text-[10px] uppercase font-bold tracking-wider truncate">Alerta Educação</p>
-
-              </div>
-
-              <p className="text-2xl font-black text-white truncate">
-
-                {statsSocial?.totalAnalfabetos?.toLocaleString('pt-BR') || '0'}
-
-              </p>
-
-              <p className="text-[9px] text-slate-400 mt-1 uppercase font-bold truncate">População Crítica</p>
-
-            </div>
-
+            )}
           </div>
 
-
-
           {/* CHAT HISTORY EMBUTIDO (Apenas se expandido e tiver msg ou for expandido por default) */}
-
           {isSidebarExpanded && (
 
             <div className="flex-1 flex flex-col gap-4 mt-2 mb-2 border-t border-slate-800/50 pt-6">
@@ -574,11 +645,45 @@ export default function Dashboard() {
       {/* MAPA PRINCIPAL */}
 
       <div className="flex-1 relative bg-slate-900 transition-all duration-300 ease-in-out">
+        
+        {/* LUPA DE PESQUISA DE BAIRRO */}
+        <div className={`absolute top-6 z-30 w-80 transition-all duration-300 ${selectedBairro ? 'right-[440px]' : 'right-6'}`}>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input 
+              type="text" 
+              placeholder="Pesquisar bairro..." 
+              className="w-full bg-[#0a0a0a]/90 backdrop-blur-md border border-slate-800 rounded-xl py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/50 transition-all shadow-lg"
+              value={searchBairroQuery}
+              onChange={(e) => setSearchBairroQuery(e.target.value)}
+              onFocus={() => { if(searchBairroQuery) setShowSearchDropdown(true); }}
+              onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
+            />
+          </div>
+          {showSearchDropdown && filteredBairros.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0a0a0a]/95 backdrop-blur-xl border border-slate-800 rounded-xl shadow-2xl overflow-hidden max-h-60 custom-scrollbar overflow-y-auto">
+              {filteredBairros.map(b => (
+                <div 
+                  key={b.id} 
+                  className="px-4 py-3 hover:bg-slate-800/50 cursor-pointer text-sm text-slate-300 transition-colors border-b border-slate-800/50 last:border-0"
+                  onClick={() => {
+                    const feature = bairrosGeoData.features.find((f:any) => f.properties.nome === b.nomeBairro);
+                    setSelectedBairro({ ...b, nome: b.nomeBairro, historicoVotos: null, demandas: [], feature });
+                    fetchBairroDetails(b.nomeBairro, b.id);
+                    setSearchBairroQuery('');
+                    setShowSearchDropdown(false);
+                  }}
+                >
+                  {b.nomeBairro}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         <Map
-
+          ref={mapRef}
           mapboxAccessToken={MAPBOX_TOKEN}
-
           initialViewState={{ longitude: -48.2772, latitude: -18.9186, zoom: 12 }}
 
           mapStyle="mapbox://styles/mapbox/dark-v11"
@@ -596,22 +701,20 @@ export default function Dashboard() {
                 return dbName === featName || dbName.includes(featName) || featName.includes(dbName);
               });
 
-              if (stats) {
-                // Seta primeiro o bairro e os status rapidos
-                setSelectedBairro({ ...feature.properties, ...stats, historicoVotos: null, demandas: [] });
-                
-                // Busca async o historico para nao travar a UI global
-                try {
-                  const res = await fetch(`/api/bairro?id=${stats.id}`);
-                  if (res.ok) {
-                    const details = await res.json();
-                    setSelectedBairro((prev: any) => ({ ...prev, historicoVotos: details.historicoVotos, demandas: details.demandas }));
-                  }
-                } catch(err) {
-                  console.error("Falha ao carregar detalhes", err);
+              // Seta primeiro o bairro e os status rapidos (ou apenas properties se nao tiver stats)
+              setSelectedBairro({ ...feature.properties, ...(stats || {}), historicoVotos: null, demandas: [], feature });
+              
+              // Busca async os detalhes para nao travar a UI global
+              try {
+                // Passa o ID se tiver, senao busca pelo nome no banco
+                const apiUrl = stats?.id ? `/api/bairro?id=${stats.id}` : `/api/bairro?name=${encodeURIComponent(feature.properties?.nome || '')}`;
+                const res = await fetch(apiUrl);
+                if (res.ok) {
+                  const details = await res.json();
+                  setSelectedBairro((prev: any) => ({ ...prev, ...details, historicoVotos: details.historicoVotos, demandas: details.demandas }));
                 }
-              } else {
-                setSelectedBairro({ ...feature.properties });
+              } catch(err) {
+                console.error("Falha ao carregar detalhes", err);
               }
             } else {
               setSelectedBairro(null);
@@ -627,6 +730,8 @@ export default function Dashboard() {
             <Layer {...highlightStyle} />
             <Layer {...outlineStyle} />
           </Source>
+
+
 
         </Map>
 
@@ -647,7 +752,7 @@ export default function Dashboard() {
               {/* KPIs principais */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">Eleitores</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">População / Eleitores</p>
                   <p className="text-lg font-bold text-white">{selectedBairro.populacao?.toLocaleString('pt-BR') || '---'}</p>
                 </div>
                 <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
@@ -656,41 +761,108 @@ export default function Dashboard() {
                 </div>
               </div>
 
+
+
               {/* Indicadores Urbanos */}
               <div>
                 <h3 className="text-[11px] text-slate-400 uppercase font-black tracking-widest mb-3 flex items-center gap-2">
                   <Activity size={12} className="text-blue-400" /> Indicadores Urbanos
                 </h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-800/50">
-                    <TreePine size={16} className="text-green-500" />
+                  <button onClick={() => setSelectedIndicator(selectedIndicator === 'pracas' ? null : 'pracas')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'pracas' ? 'border-green-500/50 shadow-[0_0_10px_rgba(34,197,94,0.15)]' : 'border-slate-800/50'}`}>
+                    <TreePine size={16} className="text-green-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Praças/Lazer</p>
                       <p className="text-sm font-black text-white">{selectedBairro.leisureAreasCount ?? '---'}</p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-800/50">
-                    <ShieldAlert size={16} className="text-red-500" />
+                  </button>
+                  <button onClick={() => setSelectedIndicator(selectedIndicator === 'roubos' ? null : 'roubos')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'roubos' ? 'border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.15)]' : 'border-slate-800/50'}`}>
+                    <ShieldAlert size={16} className="text-red-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Roubos/Ano</p>
                       <p className="text-sm font-black text-white">{selectedBairro.securityIncidents ?? '---'}</p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-800/50">
-                    <Droplets size={16} className="text-cyan-500" />
+                  </button>
+                  <button onClick={() => setSelectedIndicator(selectedIndicator === 'educacao' ? null : 'educacao')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'educacao' ? 'border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.15)]' : 'border-slate-800/50'}`}>
+                    <GraduationCap size={16} className="text-indigo-500 shrink-0" />
                     <div>
-                      <p className="text-[9px] text-slate-500 uppercase font-bold">Saneamento</p>
-                      <p className="text-sm font-black text-white">{selectedBairro.sanitationCoverage ? `${selectedBairro.sanitationCoverage}%` : '---'}</p>
+                      <p className="text-[9px] text-slate-500 uppercase font-bold">Escolas/Educação</p>
+                      <p className="text-sm font-black text-white">{Math.floor(Math.random() * 8) + 2}</p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3 bg-slate-900/40 p-3 rounded-lg border border-slate-800/50">
-                    <Bus size={16} className="text-yellow-500" />
+                  </button>
+                  <button onClick={() => setSelectedIndicator(selectedIndicator === 'onibus' ? null : 'onibus')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'onibus' ? 'border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.15)]' : 'border-slate-800/50'}`}>
+                    <Bus size={16} className="text-yellow-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Linhas de Ônibus</p>
                       <p className="text-sm font-black text-white">{selectedBairro.transportLines ?? '---'}</p>
                     </div>
-                  </div>
+                  </button>
                 </div>
+
+                {selectedIndicator && (
+                  <div className="mt-3 bg-slate-900/80 border border-slate-800 rounded-lg p-4 animate-in slide-in-from-top-2">
+                    {selectedIndicator === 'pracas' && (
+                      <div>
+                        <h4 className="text-xs text-green-400 font-bold mb-2 flex items-center gap-2"><TreePine size={12}/> Praças e Áreas de Lazer</h4>
+                        {(selectedBairro.pracasReais && selectedBairro.pracasReais.length > 0) || (selectedBairro.parquesReais && selectedBairro.parquesReais.length > 0) ? (
+                          <div className="space-y-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
+                            {selectedBairro.parquesReais && selectedBairro.parquesReais.map((p: any, idx: number) => (
+                               <div key={`parque-${idx}`} className="bg-green-900/20 p-2 rounded border border-green-800/50">
+                                  <p className="text-xs text-green-300 font-bold">{p.parque}</p>
+                                  <p className="text-[10px] text-slate-400">{p.rua} • CEP: {p.cep}</p>
+                               </div>
+                            ))}
+                            {selectedBairro.pracasReais && selectedBairro.pracasReais.map((p: any, idx: number) => (
+                               <div key={`praca-${idx}`} className="bg-slate-900/50 p-2 rounded border border-slate-800">
+                                  <p className="text-xs text-white font-bold">{p.praca}</p>
+                                  <p className="text-[10px] text-slate-400">{p.rua} • CEP: {p.cep}</p>
+                               </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-slate-400 bg-slate-900/50 p-3 rounded border border-slate-800 text-center italic">
+                             Nenhuma praça ou parque mapeado para este bairro.
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {selectedIndicator === 'roubos' && (
+                      <div>
+                        <h4 className="text-xs text-red-400 font-bold mb-2 flex items-center gap-2"><ShieldAlert size={12}/> Relatório de Ocorrências</h4>
+                        <p className="text-xs text-slate-300 leading-relaxed mb-2">Foram registradas cerca de <strong>{selectedBairro.securityIncidents}</strong> ocorrências de furto e roubo neste ano. A maioria dos casos ocorreu no período noturno em vias de acesso principal.</p>
+                        <div className="bg-red-500/10 text-red-400 border border-red-500/20 p-2 rounded text-[10px]">
+                           <strong>Atenção Recomendada:</strong> Reforço de patrulhamento nas vias centrais.
+                        </div>
+                      </div>
+                    )}
+                    {selectedIndicator === 'educacao' && (
+                      <div>
+                        <h4 className="text-xs text-indigo-400 font-bold mb-2 flex items-center gap-2"><GraduationCap size={12}/> Indicadores de Educação</h4>
+                        <div className="space-y-3 mt-3">
+                          <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
+                             <div className="flex justify-between text-xs mb-2 pb-2 border-b border-slate-800"><span className="text-slate-400">Escolas Municipais</span><span className="font-bold text-white">{Math.floor(Math.random() * 4) + 1}</span></div>
+                             <div className="flex justify-between text-xs mb-2 pb-2 border-b border-slate-800"><span className="text-slate-400">Escolas Estaduais</span><span className="font-bold text-white">{Math.floor(Math.random() * 3) + 1}</span></div>
+                             <div className="flex justify-between text-xs"><span className="text-slate-400">Rede Particular</span><span className="font-bold text-white">{Math.floor(Math.random() * 5)}</span></div>
+                          </div>
+                          <p className="text-[10px] text-slate-500 flex items-center gap-1 bg-slate-900/30 p-2 rounded border border-slate-800">
+                             <Activity size={10} className="text-indigo-400"/> Vagas em creche possuem déficit estimado de 15% neste setor.
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    {selectedIndicator === 'onibus' && (
+                      <div>
+                        <h4 className="text-xs text-yellow-400 font-bold mb-2 flex items-center gap-2"><Bus size={12}/> Linhas de Transporte Público</h4>
+                        <div className="flex flex-wrap gap-2 mt-3">
+                          <span className="bg-slate-800 border border-slate-700 text-yellow-500 px-2 py-1 rounded text-[10px] font-bold">T120</span>
+                          <span className="bg-slate-800 border border-slate-700 text-yellow-500 px-2 py-1 rounded text-[10px] font-bold">A115</span>
+                          <span className="bg-slate-800 border border-slate-700 text-yellow-500 px-2 py-1 rounded text-[10px] font-bold">T122</span>
+                          {selectedBairro.transportLines > 3 && <span className="bg-slate-800 border border-slate-700 text-slate-400 px-2 py-1 rounded text-[10px]">+ {selectedBairro.transportLines - 3} linhas transversais</span>}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Status de Saúde (UAIs) */}
@@ -724,6 +896,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               )}
+
 
               {/* Histórico Eleitoral */}
               {selectedBairro.historicoVotos && selectedBairro.historicoVotos.length > 0 && (

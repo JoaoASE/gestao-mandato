@@ -1,0 +1,530 @@
+{
+  "jardim das palmeiras": {
+    "aptos": 12379,
+    "comparecimento": 9968,
+    "abstencoes": 2411,
+    "votos_nominais": 7739,
+    "votos_brancos": 1032,
+    "votos_nulos": 1197
+  },
+  "cruzeiro do sul": {
+    "aptos": 2842,
+    "comparecimento": 2317,
+    "abstencoes": 525,
+    "votos_nominais": 1970,
+    "votos_brancos": 145,
+    "votos_nulos": 202
+  },
+  "guarani": {
+    "aptos": 6968,
+    "comparecimento": 5675,
+    "abstencoes": 1293,
+    "votos_nominais": 4333,
+    "votos_brancos": 623,
+    "votos_nulos": 719
+  },
+  "osvaldo rezende": {
+    "aptos": 14846,
+    "comparecimento": 11556,
+    "abstencoes": 3290,
+    "votos_nominais": 9668,
+    "votos_brancos": 827,
+    "votos_nulos": 1061
+  },
+  "santa luzia": {
+    "aptos": 6857,
+    "comparecimento": 5580,
+    "abstencoes": 1277,
+    "votos_nominais": 4435,
+    "votos_brancos": 551,
+    "votos_nulos": 594
+  },
+  "tabajaras": {
+    "aptos": 9821,
+    "comparecimento": 7597,
+    "abstencoes": 2224,
+    "votos_nominais": 6794,
+    "votos_brancos": 283,
+    "votos_nulos": 520
+  },
+  "jardim canaa": {
+    "aptos": 14492,
+    "comparecimento": 11401,
+    "abstencoes": 3091,
+    "votos_nominais": 8287,
+    "votos_brancos": 1571,
+    "votos_nulos": 1543
+  },
+  "liberdade": {
+    "aptos": 3125,
+    "comparecimento": 2631,
+    "abstencoes": 494,
+    "votos_nominais": 2038,
+    "votos_brancos": 266,
+    "votos_nulos": 327
+  },
+  "cidade jardim": {
+    "aptos": 6624,
+    "comparecimento": 5605,
+    "abstencoes": 1019,
+    "votos_nominais": 4942,
+    "votos_brancos": 289,
+    "votos_nulos": 374
+  },
+  "planalto": {
+    "aptos": 24242,
+    "comparecimento": 19553,
+    "abstencoes": 4689,
+    "votos_nominais": 15434,
+    "votos_brancos": 1946,
+    "votos_nulos": 2173
+  },
+  "presidente roosevelt": {
+    "aptos": 19105,
+    "comparecimento": 15611,
+    "abstencoes": 3494,
+    "votos_nominais": 12654,
+    "votos_brancos": 1339,
+    "votos_nulos": 1618
+  },
+  "martha helena": {
+    "aptos": 9318,
+    "comparecimento": 7466,
+    "abstencoes": 1852,
+    "votos_nominais": 5944,
+    "votos_brancos": 643,
+    "votos_nulos": 879
+  },
+  "dom almir": {
+    "aptos": 6567,
+    "comparecimento": 5022,
+    "abstencoes": 1545,
+    "votos_nominais": 3621,
+    "votos_brancos": 670,
+    "votos_nulos": 731
+  },
+  "morumbi": {
+    "aptos": 15594,
+    "comparecimento": 12180,
+    "abstencoes": 3414,
+    "votos_nominais": 9025,
+    "votos_brancos": 1585,
+    "votos_nulos": 1570
+  },
+  "dona zulmira": {
+    "aptos": 2425,
+    "comparecimento": 1891,
+    "abstencoes": 534,
+    "votos_nominais": 1481,
+    "votos_brancos": 193,
+    "votos_nulos": 217
+  },
+  "tibery": {
+    "aptos": 14556,
+    "comparecimento": 11886,
+    "abstencoes": 2670,
+    "votos_nominais": 9684,
+    "votos_brancos": 1023,
+    "votos_nulos": 1179
+  },
+  "tocantins": {
+    "aptos": 11596,
+    "comparecimento": 9081,
+    "abstencoes": 2515,
+    "votos_nominais": 6978,
+    "votos_brancos": 1028,
+    "votos_nulos": 1075
+  },
+  "maravilha": {
+    "aptos": 2065,
+    "comparecimento": 1619,
+    "abstencoes": 446,
+    "votos_nominais": 1218,
+    "votos_brancos": 165,
+    "votos_nulos": 236
+  },
+  "mansour": {
+    "aptos": 12575,
+    "comparecimento": 10273,
+    "abstencoes": 2302,
+    "votos_nominais": 8024,
+    "votos_brancos": 1094,
+    "votos_nulos": 1155
+  },
+  "sao jorge": {
+    "aptos": 19042,
+    "comparecimento": 15204,
+    "abstencoes": 3838,
+    "votos_nominais": 11507,
+    "votos_brancos": 1791,
+    "votos_nulos": 1906
+  },
+  "jardim brasilia": {
+    "aptos": 12396,
+    "comparecimento": 9878,
+    "abstencoes": 2518,
+    "votos_nominais": 7678,
+    "votos_brancos": 1036,
+    "votos_nulos": 1164
+  },
+  "jardim patricia": {
+    "aptos": 5670,
+    "comparecimento": 4750,
+    "abstencoes": 920,
+    "votos_nominais": 3998,
+    "votos_brancos": 335,
+    "votos_nulos": 417
+  },
+  "martins": {
+    "aptos": 20219,
+    "comparecimento": 15599,
+    "abstencoes": 4620,
+    "votos_nominais": 13802,
+    "votos_brancos": 998,
+    "votos_nulos": 1296
+  },
+  "santa monica": {
+    "aptos": 40004,
+    "comparecimento": 33039,
+    "abstencoes": 6965,
+    "votos_nominais": 28267,
+    "votos_brancos": 2155,
+    "votos_nulos": 2617
+  },
+  "brasil": {
+    "aptos": 15489,
+    "comparecimento": 12743,
+    "abstencoes": 2746,
+    "votos_nominais": 10941,
+    "votos_brancos": 735,
+    "votos_nulos": 1067
+  },
+  "bom jesus": {
+    "aptos": 3953,
+    "comparecimento": 3141,
+    "abstencoes": 812,
+    "votos_nominais": 2660,
+    "votos_brancos": 200,
+    "votos_nulos": 281
+  },
+  "pacaembu": {
+    "aptos": 9628,
+    "comparecimento": 8071,
+    "abstencoes": 1557,
+    "votos_nominais": 6339,
+    "votos_brancos": 768,
+    "votos_nulos": 964
+  },
+  "lidice": {
+    "aptos": 11142,
+    "comparecimento": 9133,
+    "abstencoes": 2009,
+    "votos_nominais": 8170,
+    "votos_brancos": 446,
+    "votos_nulos": 517
+  },
+  "laranjeiras": {
+    "aptos": 16729,
+    "comparecimento": 13718,
+    "abstencoes": 3011,
+    "votos_nominais": 10356,
+    "votos_brancos": 1575,
+    "votos_nulos": 1787
+  },
+  "nossa senhora das gracas": {
+    "aptos": 6135,
+    "comparecimento": 5128,
+    "abstencoes": 1007,
+    "votos_nominais": 4040,
+    "votos_brancos": 495,
+    "votos_nulos": 593
+  },
+  "umuarama": {
+    "aptos": 3255,
+    "comparecimento": 2648,
+    "abstencoes": 607,
+    "votos_nominais": 2267,
+    "votos_brancos": 168,
+    "votos_nulos": 213
+  },
+  "custodio pereira": {
+    "aptos": 13504,
+    "comparecimento": 11078,
+    "abstencoes": 2426,
+    "votos_nominais": 8846,
+    "votos_brancos": 982,
+    "votos_nulos": 1250
+  },
+  "fundinho": {
+    "aptos": 5797,
+    "comparecimento": 4777,
+    "abstencoes": 1020,
+    "votos_nominais": 4247,
+    "votos_brancos": 244,
+    "votos_nulos": 286
+  },
+  "shopping park": {
+    "aptos": 12078,
+    "comparecimento": 9332,
+    "abstencoes": 2746,
+    "votos_nominais": 6710,
+    "votos_brancos": 1379,
+    "votos_nulos": 1243
+  },
+  "luizote de freitas": {
+    "aptos": 20987,
+    "comparecimento": 16753,
+    "abstencoes": 4234,
+    "votos_nominais": 13175,
+    "votos_brancos": 1701,
+    "votos_nulos": 1877
+  },
+  "centro": {
+    "aptos": 5053,
+    "comparecimento": 3979,
+    "abstencoes": 1074,
+    "votos_nominais": 3425,
+    "votos_brancos": 268,
+    "votos_nulos": 286
+  },
+  "taiaman": {
+    "aptos": 4933,
+    "comparecimento": 3967,
+    "abstencoes": 966,
+    "votos_nominais": 3081,
+    "votos_brancos": 405,
+    "votos_nulos": 481
+  },
+  "alvorada": {
+    "aptos": 3429,
+    "comparecimento": 2759,
+    "abstencoes": 670,
+    "votos_nominais": 2120,
+    "votos_brancos": 299,
+    "votos_nulos": 340
+  },
+  "cazeca": {
+    "aptos": 4766,
+    "comparecimento": 3956,
+    "abstencoes": 810,
+    "votos_nominais": 3427,
+    "votos_brancos": 253,
+    "votos_nulos": 276
+  },
+  "segismundo pereira": {
+    "aptos": 9826,
+    "comparecimento": 8109,
+    "abstencoes": 1717,
+    "votos_nominais": 6528,
+    "votos_brancos": 692,
+    "votos_nulos": 889
+  },
+  "tubalina": {
+    "aptos": 5831,
+    "comparecimento": 4739,
+    "abstencoes": 1092,
+    "votos_nominais": 3799,
+    "votos_brancos": 452,
+    "votos_nulos": 488
+  },
+  "jaragua": {
+    "aptos": 5179,
+    "comparecimento": 4022,
+    "abstencoes": 1157,
+    "votos_nominais": 3183,
+    "votos_brancos": 364,
+    "votos_nulos": 475
+  },
+  "saraiva": {
+    "aptos": 6029,
+    "comparecimento": 4961,
+    "abstencoes": 1068,
+    "votos_nominais": 4256,
+    "votos_brancos": 301,
+    "votos_nulos": 404
+  },
+  "aparecida": {
+    "aptos": 8351,
+    "comparecimento": 6746,
+    "abstencoes": 1605,
+    "votos_nominais": 5793,
+    "votos_brancos": 432,
+    "votos_nulos": 521
+  },
+  "pampulha": {
+    "aptos": 3447,
+    "comparecimento": 2758,
+    "abstencoes": 689,
+    "votos_nominais": 2225,
+    "votos_brancos": 243,
+    "votos_nulos": 290
+  },
+  "jardim ipanema": {
+    "aptos": 4860,
+    "comparecimento": 3994,
+    "abstencoes": 866,
+    "votos_nominais": 3018,
+    "votos_brancos": 436,
+    "votos_nulos": 540
+  },
+  "aclimacao": {
+    "aptos": 5095,
+    "comparecimento": 4130,
+    "abstencoes": 965,
+    "votos_nominais": 3173,
+    "votos_brancos": 422,
+    "votos_nulos": 535
+  },
+  "panorama": {
+    "aptos": 3712,
+    "comparecimento": 2946,
+    "abstencoes": 766,
+    "votos_nominais": 2186,
+    "votos_brancos": 397,
+    "votos_nulos": 363
+  },
+  "morada da colina": {
+    "aptos": 7560,
+    "comparecimento": 6382,
+    "abstencoes": 1178,
+    "votos_nominais": 5681,
+    "votos_brancos": 353,
+    "votos_nulos": 348
+  },
+  "morada nova": {
+    "aptos": 4963,
+    "comparecimento": 3609,
+    "abstencoes": 1354,
+    "votos_nominais": 2598,
+    "votos_brancos": 481,
+    "votos_nulos": 530
+  },
+  "santa maria": {
+    "aptos": 1861,
+    "comparecimento": 1535,
+    "abstencoes": 326,
+    "votos_nominais": 1336,
+    "votos_brancos": 75,
+    "votos_nulos": 124
+  },
+  "granada": {
+    "aptos": 7844,
+    "comparecimento": 6556,
+    "abstencoes": 1288,
+    "votos_nominais": 5288,
+    "votos_brancos": 552,
+    "votos_nulos": 716
+  },
+  "distrito de tapuirama": {
+    "aptos": 1749,
+    "comparecimento": 1372,
+    "abstencoes": 377,
+    "votos_nominais": 1066,
+    "votos_brancos": 121,
+    "votos_nulos": 185
+  },
+  "residencial carajas": {
+    "aptos": 3460,
+    "comparecimento": 2851,
+    "abstencoes": 609,
+    "votos_nominais": 2244,
+    "votos_brancos": 273,
+    "votos_nulos": 334
+  },
+  "distrito de martinesia": {
+    "aptos": 589,
+    "comparecimento": 467,
+    "abstencoes": 122,
+    "votos_nominais": 370,
+    "votos_brancos": 39,
+    "votos_nulos": 58
+  },
+  "minas gerais": {
+    "aptos": 4855,
+    "comparecimento": 4016,
+    "abstencoes": 839,
+    "votos_nominais": 3093,
+    "votos_brancos": 436,
+    "votos_nulos": 487
+  },
+  "distrito cruzeiro dos peixotos": {
+    "aptos": 658,
+    "comparecimento": 507,
+    "abstencoes": 151,
+    "votos_nominais": 404,
+    "votos_brancos": 36,
+    "votos_nulos": 67
+  },
+  "distrito de miraporanga": {
+    "aptos": 517,
+    "comparecimento": 394,
+    "abstencoes": 123,
+    "votos_nominais": 305,
+    "votos_brancos": 58,
+    "votos_nulos": 31
+  },
+  "jardim holanda": {
+    "aptos": 4162,
+    "comparecimento": 3499,
+    "abstencoes": 663,
+    "votos_nominais": 2770,
+    "votos_brancos": 349,
+    "votos_nulos": 380
+  },
+  "residencial integracao": {
+    "aptos": 1956,
+    "comparecimento": 1432,
+    "abstencoes": 524,
+    "votos_nominais": 1089,
+    "votos_brancos": 200,
+    "votos_nulos": 143
+  },
+  "gavea": {
+    "aptos": 2131,
+    "comparecimento": 1716,
+    "abstencoes": 415,
+    "votos_nominais": 1463,
+    "votos_brancos": 131,
+    "votos_nulos": 122
+  },
+  "pequis": {
+    "aptos": 2830,
+    "comparecimento": 2139,
+    "abstencoes": 691,
+    "votos_nominais": 1556,
+    "votos_brancos": 321,
+    "votos_nulos": 262
+  },
+  "santa rosa": {
+    "aptos": 961,
+    "comparecimento": 742,
+    "abstencoes": 219,
+    "votos_nominais": 598,
+    "votos_brancos": 69,
+    "votos_nulos": 75
+  },
+  "monte hebron": {
+    "aptos": 562,
+    "comparecimento": 425,
+    "abstencoes": 137,
+    "votos_nominais": 307,
+    "votos_brancos": 71,
+    "votos_nulos": 47
+  },
+  "patrimonio": {
+    "aptos": 296,
+    "comparecimento": 261,
+    "abstencoes": 35,
+    "votos_nominais": 242,
+    "votos_brancos": 8,
+    "votos_nulos": 11
+  },
+  "vigilato pereira": {
+    "aptos": 311,
+    "comparecimento": 272,
+    "abstencoes": 39,
+    "votos_nominais": 245,
+    "votos_brancos": 16,
+    "votos_nulos": 11
+  }
+}

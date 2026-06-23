@@ -28,11 +28,14 @@ export default function RelatoriosPage() {
   const [totalRows, setTotalRows] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [tempSearch, setTempSearch] = useState('');
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [tempColumnFilters, setTempColumnFilters] = useState<Record<string, string>>({});
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/csv?file=${encodeURIComponent(selectedFile)}&page=${page}&limit=100&search=${encodeURIComponent(searchQuery)}`);
+      const filtersStr = encodeURIComponent(JSON.stringify(columnFilters));
+      const res = await fetch(`/api/csv?file=${encodeURIComponent(selectedFile)}&page=${page}&limit=100&search=${encodeURIComponent(searchQuery)}&filters=${filtersStr}`);
       const result = await res.json();
       
       if (result.data) {
@@ -54,16 +57,17 @@ export default function RelatoriosPage() {
 
   useEffect(() => {
     fetchData();
-  }, [selectedFile, page, searchQuery]);
+  }, [selectedFile, page, searchQuery, columnFilters]);
 
   // Reset pagination when file or search changes
   useEffect(() => {
     setPage(1);
-  }, [selectedFile, searchQuery]);
+  }, [selectedFile, searchQuery, columnFilters]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setSearchQuery(tempSearch);
+    setColumnFilters(tempColumnFilters);
   };
 
   return (
@@ -94,7 +98,13 @@ export default function RelatoriosPage() {
           {FILES.map(file => (
             <button
               key={file}
-              onClick={() => setSelectedFile(file)}
+              onClick={() => {
+                 setSelectedFile(file);
+                 setTempSearch('');
+                 setSearchQuery('');
+                 setColumnFilters({});
+                 setTempColumnFilters({});
+              }}
               className={`w-full text-left p-3 rounded-xl text-xs transition-all ${selectedFile === file ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold shadow-lg' : 'text-slate-400 hover:bg-slate-800/50 border border-transparent'}`}
             >
               {file.replace(' Uberlandia.csv', '').replace('.csv', '')}
@@ -152,8 +162,23 @@ export default function RelatoriosPage() {
                   <thead>
                     <tr className="bg-slate-900 border-b border-slate-800">
                       {columns.map(col => (
-                        <th key={col} className="px-4 py-3 font-bold text-slate-300 text-[11px] uppercase tracking-wider">
-                          {col.replace(/_/g, ' ')}
+                        <th key={col} className="px-4 py-3 align-top min-w-[150px]">
+                          <div className="font-bold text-slate-300 text-[11px] uppercase tracking-wider mb-2 truncate" title={col.replace(/_/g, ' ')}>
+                            {col.replace(/_/g, ' ')}
+                          </div>
+                          <input 
+                            type="text"
+                            placeholder="Filtrar..."
+                            value={tempColumnFilters[col] || ''}
+                            onChange={e => setTempColumnFilters(prev => ({...prev, [col]: e.target.value}))}
+                            onKeyDown={e => {
+                               if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleSearch(e as any);
+                               }
+                            }}
+                            className="w-full bg-[#050505] border border-slate-800 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-slate-600"
+                          />
                         </th>
                       ))}
                     </tr>

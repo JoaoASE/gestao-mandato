@@ -9,6 +9,11 @@ export async function GET(request: Request) {
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '100');
   const search = searchParams.get('search')?.toLowerCase() || '';
+  const filtersParam = searchParams.get('filters');
+  let filters: Record<string, string> = {};
+  if (filtersParam) {
+    try { filters = JSON.parse(decodeURIComponent(filtersParam)); } catch(e) {}
+  }
 
   if (!file || !file.endsWith('.csv')) {
     return NextResponse.json({ error: 'Arquivo inválido' }, { status: 400 });
@@ -36,6 +41,19 @@ export async function GET(request: Request) {
           matches = Object.values(data).some((val: any) => 
             String(val).toLowerCase().includes(search)
           );
+        }
+
+        if (matches && Object.keys(filters).length > 0) {
+           for (const key of Object.keys(filters)) {
+              if (filters[key]) {
+                 const cellVal = String(data[key] || '').toLowerCase();
+                 const filterVal = filters[key].toLowerCase();
+                 if (!cellVal.includes(filterVal)) {
+                    matches = false;
+                    break;
+                 }
+              }
+           }
         }
 
         if (matches) {
