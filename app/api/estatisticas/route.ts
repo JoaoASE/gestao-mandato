@@ -11,7 +11,7 @@ export async function GET() {
       }
     });
 
-    const stats = neighborhoods.map(n => ({
+    const stats = neighborhoods.map((n: any) => ({
       id: n.id,
       nomeBairro: n.name,
       rendaMedia: n.averageIncome || 0,

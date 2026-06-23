@@ -55,7 +55,7 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 export default function Dashboard() {
   const [estatisticas, setEstatisticas] = useState<any[]>([]);
-  const [statsSocial, setStatsSocial] = useState({ totalAnalfabetos: 0 });
+  const [statsSocial, setStatsSocial] = useState<any>({ totalAnalfabetos: 0 });
   const [searchQuery, setSearchQuery] = useState(''); // candidato search
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const router = useRouter();
@@ -102,9 +102,7 @@ export default function Dashboard() {
   const [isManualLoading, setIsManualLoading] = useState(false);
 
   // Usamos useChat apenas para gerenciar o estado das mensagens
-  const { messages, setMessages } = useChat({
-    api: '/api/chat',
-  });
+  const { messages, setMessages } = useChat();
 
   const isLoading = isManualLoading;
 
@@ -146,7 +144,12 @@ export default function Dashboard() {
              id: null,
              nomeBairro: f.properties.nome
          }));
-         const uniqueNames = Array.from(new Map(names.map((item: any) => [item.nomeBairro, item])).values());
+         const seen = new Set<string>();
+         const uniqueNames = names.filter((item: any) => {
+           if (seen.has(item.nomeBairro)) return false;
+           seen.add(item.nomeBairro);
+           return true;
+         });
          setEstatisticas(uniqueNames as any[]);
        } catch(e) {
          setEstatisticas([]);
@@ -532,7 +535,7 @@ export default function Dashboard() {
 
                       )}
 
-                      <div className="whitespace-pre-wrap">{m.content}</div>
+                      <div className="whitespace-pre-wrap">{(m as any).content ?? m.parts?.map((p: any) => p.text).join('') ?? ''}</div>
 
                     </div>
 
@@ -692,7 +695,7 @@ export default function Dashboard() {
 
           onClick={async e => {
             const feature = e.features && e.features[0];
-            if (feature && feature.layer.id === 'bairros-fill') {
+            if (feature && feature.layer?.id === 'bairros-fill') {
               const normalizeString = (str: string) => str ? str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim() : '';
               const featName = normalizeString(feature.properties?.nome || '');
               
