@@ -42,10 +42,11 @@ import {
   TreePine,
   Clock,
   HeartPulse,
-  GraduationCap
+  GraduationCap, LogOut, Home
 } from 'lucide-react';
 import bairrosGeoData from '../../public/uberlandia-bairros.json';
 import { useRouter } from 'next/navigation';
+import { useUser, useClerk } from '@clerk/nextjs';
 
 
 
@@ -59,6 +60,10 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState(''); // candidato search
   const [selectedYear, setSelectedYear] = useState<string | null>(null);
   const router = useRouter();
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const candidateName = user?.firstName || user?.fullName || 'Candidato';
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mapRef = useRef<any>(null);
   const [busRouteGeojson, setBusRouteGeojson] = useState<any>(null);
 
@@ -90,7 +95,6 @@ export default function Dashboard() {
   // UX State
 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
 
 
@@ -345,7 +349,7 @@ export default function Dashboard() {
 
   return (
 
-    <main className="flex h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans">
+    <main className="flex h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans bg-grid">
 
      
 
@@ -362,6 +366,15 @@ export default function Dashboard() {
         <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/></svg>
       </button>
 
+      {/* Mobile overlay */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-black/60 z-40 md:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+      {/* Hamburger */}
+      <button className="fixed top-4 left-4 z-50 md:hidden bg-[#080808] border border-white/[0.04] rounded-xl p-2 text-slate-400 hover:text-slate-200 transition-colors" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="5" x2="15" y2="5"/><line x1="3" y1="9" x2="15" y2="9"/><line x1="3" y1="13" x2="15" y2="13"/></svg>
+      </button>
+
       {/* SIDEBAR INTELIGENTE (Flexbox e Transições) */}
 
       <div
@@ -372,44 +385,35 @@ export default function Dashboard() {
 
        
 
-        {/* Cabecalho e Botao Collapse */}
-
-        <div className="p-6 pb-4 border-b border-slate-800/50 flex justify-between items-start shrink-0">
-
-          <div>
-
-            <div className="flex items-center gap-2 mb-1">
-
-              <BrainCircuit className="text-purple-400 shrink-0" size={24} />
-
-              <h1 className="text-xl font-black tracking-tighter bg-gradient-to-r from-purple-400 to-cyan-300 bg-clip-text text-transparent whitespace-nowrap overflow-hidden">
-
-                ORÁCULO
-
-              </h1>
-
+        {/* Header */}
+        <div className="p-4 border-b border-white/[0.04] flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-600 to-amber-500 flex items-center justify-center shrink-0">
+              <Zap size={14} className="text-white" />
             </div>
-
-            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono whitespace-nowrap">Assistente IA</p>
-
+            <span className="font-bold text-sm bg-gradient-to-r from-purple-400 to-amber-400 bg-clip-text text-transparent">Oráculo</span>
           </div>
+          <div className="flex items-center gap-2">
+            <button onClick={() => router.push('/')} className="p-1.5 text-slate-600 hover:text-slate-400 transition-colors" title="Visão Geral">
+              <Home size={16} />
+            </button>
+            <button onClick={() => setIsSidebarExpanded(!isSidebarExpanded)} className="p-1.5 text-slate-600 hover:text-slate-400 transition-colors">
+              {isSidebarExpanded ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </button>
+          </div>
+        </div>
 
-
-
-          <button
-
-            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-
-            className="p-2 bg-slate-800/50 hover:bg-slate-700 rounded-xl text-slate-400 transition-colors"
-
-            title="Expandir/Comprimir Oráculo"
-
-          >
-
-            {isSidebarExpanded ? <ChevronLeft size={18} /> : <ChevronRight size={18} />}
-
-          </button>
-
+        {/* Candidato */}
+        <div className="px-4 py-3 border-b border-white/[0.04] shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-700 flex items-center justify-center text-xs font-bold text-white shrink-0">
+              {candidateName?.[0]?.toUpperCase() || 'C'}
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-semibold text-slate-200 truncate">{candidateName}</div>
+              <div className="text-[10px] text-slate-600">Candidato · Uberlândia</div>
+            </div>
+          </div>
         </div>
 
 
@@ -420,41 +424,19 @@ export default function Dashboard() {
 
          
 
-          <nav className={`space-y-2 shrink-0 ${isSidebarExpanded ? 'flex gap-2 space-y-0' : ''}`}>
-
-            <div className="flex-1 flex items-center gap-3 p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20 cursor-pointer">
-
-              <LayoutDashboard size={18} className="shrink-0" />
-
-              <span className="text-sm font-semibold whitespace-nowrap">Dados</span>
-
-            </div>
-
-            <div 
-              onClick={() => router.push('/previsoes')}
-              className="flex-1 flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-800/30 rounded-xl transition-all cursor-pointer"
-            >
-
-              <TrendingUp size={18} className="shrink-0" />
-
-              <span className="text-sm font-semibold whitespace-nowrap">Previsões</span>
-
-            </div>
-
-            <div 
-
-              onClick={() => router.push('/relatorios')}
-
-              className="flex-1 flex items-center gap-3 p-3 text-slate-500 hover:bg-slate-800/30 rounded-xl transition-all cursor-pointer"
-
-            >
-
-              <FileText size={18} className="shrink-0" />
-
-              <span className="text-sm font-semibold whitespace-nowrap">Relatórios</span>
-
-            </div>
-
+          <nav className="space-y-1 shrink-0 pb-2 border-b border-white/[0.04]">
+            <button className="w-full flex items-center gap-3 px-3 py-2 rounded-xl bg-purple-500/15 text-purple-300 border border-purple-500/20 text-left">
+              <LayoutDashboard size={16} className="shrink-0" />
+              <span className="text-sm font-medium">Mapa Eleitoral</span>
+            </button>
+            <button onClick={() => router.push('/previsoes')} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] transition-all text-left">
+              <TrendingUp size={16} className="shrink-0" />
+              <span className="text-sm font-medium">Previsões</span>
+            </button>
+            <button onClick={() => router.push('/relatorios')} className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] transition-all text-left">
+              <FileText size={16} className="shrink-0" />
+              <span className="text-sm font-medium">Relatórios</span>
+            </button>
           </nav>
 
 
