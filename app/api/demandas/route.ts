@@ -1,19 +1,15 @@
-import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { getCurrentCandidate } from '@/lib/getCurrentCandidate'
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { neighborhoodId, description } = body;
+    const candidate = await getCurrentCandidate()
+    const body = await request.json()
+    const { neighborhoodId, description } = body
 
     if (!neighborhoodId || !description) {
-      return NextResponse.json({ error: 'Faltam campos obrigatórios' }, { status: 400 });
-    }
-
-    // Pega o primeiro candidato do banco como autor (mock para o usuário atual)
-    const candidate = await prisma.candidate.findFirst();
-    if (!candidate) {
-      return NextResponse.json({ error: 'Candidato não encontrado' }, { status: 400 });
+      return NextResponse.json({ error: 'Faltam campos obrigatórios' }, { status: 400 })
     }
 
     const newDemand = await prisma.citizenDemand.create({
@@ -27,13 +23,16 @@ export async function POST(request: Request) {
         sentiment: 'Neutro',
         latitude: 0,
         longitude: 0,
-        status: 'PENDENTE'
-      }
-    });
+        status: 'PENDENTE',
+      },
+    })
 
-    return NextResponse.json(newDemand);
+    return NextResponse.json(newDemand)
   } catch (error: any) {
-    console.error("Erro em /api/demandas:", error);
-    return NextResponse.json({ error: error.message || "Erro desconhecido" }, { status: 500 });
+    if (error.message === 'Não autenticado') {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+    console.error('Erro em /api/demandas:', error)
+    return NextResponse.json({ error: error.message || 'Erro desconhecido' }, { status: 500 })
   }
 }
