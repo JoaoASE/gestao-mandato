@@ -160,8 +160,18 @@ export async function GET(request: Request) {
       averageWaitTime: fac.averageWaitTime ?? null,
     }))
 
+    // Buscar escolas da tabela de métricas
+    let escolasCount: number | null = null
+    try {
+      const escolaMetric = await prisma.neighborhoodMetric.findFirst({
+        where: { neighborhoodId: bairro.id, metricType: 'ESCOLAS' }
+      })
+      if (escolaMetric) escolasCount = escolaMetric.value
+    } catch (e) {}
+
     return NextResponse.json({
       ...safeData,
+      escolasCount,
       populacao: eleitoralStats?.aptos || safeData.totalVoters,
       eleitoralStats,
       demographics,
