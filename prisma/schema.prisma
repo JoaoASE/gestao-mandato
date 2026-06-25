@@ -136,3 +136,104 @@ model CrimeOccurrence {
   @@index([neighborhoodId, year, month])
   @@index([cityId, year, month])
 }
+
+// ── Dados TSE importados dos CSVs ─────────────────────────────────────────────
+
+model TseCandidato {
+  id               String @id @default(uuid())
+  ano              Int
+  sequencial       String
+  numero           String
+  nome             String
+  nomeUrna         String
+  numeroPartido    String
+  siglaPartido     String
+  cargo            String
+  situacao         String
+  genero           String?
+  idade            Int?
+  instrucao        String?
+  ocupacao         String?
+  estadoCivil      String?
+  raca             String?
+  email            String?
+
+  @@unique([ano, sequencial])
+  @@index([ano, cargo])
+  @@index([siglaPartido])
+}
+
+model TseResultadoSecao {
+  id                  String @id @default(uuid())
+  ano                 Int
+  turno               Int
+  zona                String
+  secao               String
+  cargo               String
+  siglaPartido        String
+  numeroCandidato     String
+  sequencialCandidato String
+  votos               Int
+
+  @@index([ano, cargo])
+  @@index([numeroCandidato, ano])
+}
+
+model TseDetalhesSecao {
+  id                    String @id @default(uuid())
+  ano                   Int
+  turno                 Int
+  zona                  String
+  secao                 String
+  cargo                 String
+  aptos                 Int
+  comparecimento        Int
+  abstencoes            Int
+  votosNominais         Int
+  votosBrancos          Int
+  votosNulos            Int
+  proporcaoComparecimento Float?
+
+  @@index([ano, zona])
+}
+
+model TsePerfilEleitorado {
+  id           String @id @default(uuid())
+  ano          Int
+  turno        Int
+  zona         String
+  secao        String
+  nome         String   // nome do local de votação
+  tipo         String?
+  endereco     String?
+  bairro       String?
+  latitude     Float?
+  longitude    Float?
+  eleitores    Int
+
+  @@index([ano, bairro])
+  @@index([bairro])
+}
+
+model TsePartido {
+  id               String @id @default(uuid())
+  ano              Int
+  sigla            String
+  nome             String
+  cargo            String
+  situacaoLegenda  String?
+  nomeColigacao    String?
+
+  @@index([ano, sigla])
+}
+
+model PopulacaoMunicipio {
+  id          String @id @default(uuid())
+  ano         Int
+  grupoIdade  String
+  sexo        String
+  corRaca     String
+  populacao   Int
+
+  @@index([ano])
+}

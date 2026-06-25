@@ -5,15 +5,17 @@ import { useRouter } from 'next/navigation'
 import { Search, ChevronLeft, ChevronRight, Database, FileText, ArrowLeft, Loader2, Download } from 'lucide-react'
 
 const SOURCES = [
-  { id: 'candidatos',          label: 'Candidatos',                icon: '👤', desc: 'TSE 2008–2024' },
-  { id: 'bairros',             label: 'Bairros — Indicadores',     icon: '🏘️', desc: 'Banco de dados' },
-  { id: 'resultados_eleitorais', label: 'Resultados por Seção',    icon: '🗳️', desc: 'TSE 2022' },
-  { id: 'demandas',            label: 'Demandas Registradas',       icon: '📋', desc: 'Banco de dados' },
-  { id: 'partidos',            label: 'Partidos',                  icon: '🏛️', desc: 'TSE Uberlândia' },
-  { id: 'perfil_eleitorado',   label: 'Perfil do Eleitorado',      icon: '👥', desc: 'TSE por seção' },
+  { id: 'candidatos',            label: 'Candidatos',             icon: '👤', desc: 'TSE · 3.989 registros' },
+  { id: 'bairros',               label: 'Bairros — Indicadores',  icon: '🏘️', desc: 'Banco · dados reais' },
+  { id: 'resultados_eleitorais', label: 'Resultados por Seção',   icon: '🗳️', desc: 'TSE · 45.513 registros' },
+  { id: 'detalhes_secao',        label: 'Detalhes por Seção',     icon: '📊', desc: 'TSE · 37.310 registros' },
+  { id: 'perfil_eleitorado',     label: 'Perfil do Eleitorado',   icon: '👥', desc: 'TSE · 17.962 seções' },
+  { id: 'partidos',              label: 'Partidos',               icon: '🏛️', desc: 'TSE · 491 registros' },
+  { id: 'demandas',              label: 'Demandas Registradas',   icon: '📋', desc: 'Banco · tempo real' },
+  { id: 'populacao',             label: 'População por Grupo',    icon: '👨‍👩‍👧', desc: 'IBGE Censo 2022' },
 ]
 
-const ANO_OPTS = ['', '2024', '2022', '2020', '2016', '2012', '2008']
+const ANO_OPTS = ['', '2024', '2022', '2020', '2018', '2016', '2012', '2008', '2004', '2000']
 
 export default function RelatoriosPage() {
   const router = useRouter()
@@ -137,7 +139,7 @@ export default function RelatoriosPage() {
             </div>
             <div className="flex items-center gap-2">
               {/* Filtro de ano */}
-              {['candidatos','resultados_eleitorais','perfil_eleitorado','partidos'].includes(source) && (
+              {['candidatos','resultados_eleitorais','detalhes_secao','perfil_eleitorado','partidos'].includes(source) && (
                 <select
                   value={ano}
                   onChange={e => setAno(e.target.value)}
