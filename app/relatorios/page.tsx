@@ -1,228 +1,250 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import { FileText, Search, ChevronLeft, ChevronRight, BrainCircuit, ArrowLeft } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Search, ChevronLeft, ChevronRight, Database, FileText, ArrowLeft, Loader2, Download } from 'lucide-react'
 
-const FILES = [
-  'Candidatos Uberlandia.csv',
-  'Detalhes Secao Eleitoral Uberlandia.csv',
-  'Detalhes Zona Eleitoral Uberlandia.csv',
-  'Partidos Uberlandia.csv',
-  'Perfil Eleitorado por Local Uberlandia.csv',
-  'Resultado Candidato por Secao Uberlandia.csv',
-  'Resultado Candidato por Zona Uberlandia.csv',
-  'censoIBGE.csv'
-];
+const SOURCES = [
+  { id: 'candidatos',          label: 'Candidatos',                icon: '👤', desc: 'TSE 2008–2024' },
+  { id: 'bairros',             label: 'Bairros — Indicadores',     icon: '🏘️', desc: 'Banco de dados' },
+  { id: 'resultados_eleitorais', label: 'Resultados por Seção',    icon: '🗳️', desc: 'TSE 2022' },
+  { id: 'demandas',            label: 'Demandas Registradas',       icon: '📋', desc: 'Banco de dados' },
+  { id: 'partidos',            label: 'Partidos',                  icon: '🏛️', desc: 'TSE Uberlândia' },
+  { id: 'perfil_eleitorado',   label: 'Perfil do Eleitorado',      icon: '👥', desc: 'TSE por seção' },
+]
+
+const ANO_OPTS = ['', '2024', '2022', '2020', '2016', '2012', '2008']
 
 export default function RelatoriosPage() {
-  const router = useRouter();
-  const [selectedFile, setSelectedFile] = useState(FILES[0]);
-  const [data, setData] = useState<any[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  
-  // Paginação e Busca
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [tempSearch, setTempSearch] = useState('');
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
-  const [tempColumnFilters, setTempColumnFilters] = useState<Record<string, string>>({});
+  const router = useRouter()
+  const [source, setSource] = useState(SOURCES[0].id)
+  const [data, setData] = useState<any[]>([])
+  const [columns, setColumns] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
+  const [page, setPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalRows, setTotalRows] = useState(0)
+  const [search, setSearch] = useState('')
+  const [tempSearch, setTempSearch] = useState('')
+  const [ano, setAno] = useState('')
+  const [dataSource, setDataSource] = useState('')
 
   const fetchData = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
-      const filtersStr = encodeURIComponent(JSON.stringify(columnFilters));
-      const res = await fetch(`/api/csv?file=${encodeURIComponent(selectedFile)}&page=${page}&limit=100&search=${encodeURIComponent(searchQuery)}&filters=${filtersStr}`);
-      const result = await res.json();
-      
+      const params = new URLSearchParams({
+        source, page: String(page), limit: '100',
+        search, ano,
+      })
+      const res = await fetch(`/api/relatorios?${params}`)
+      const result = await res.json()
       if (result.data) {
-        setData(result.data);
-        if (result.data.length > 0) {
-          setColumns(Object.keys(result.data[0]));
-        } else {
-          setColumns([]);
-        }
-        setTotalPages(result.totalPages);
-        setTotalRows(result.totalRows);
+        setData(result.data)
+        setColumns(result.columns || (result.data[0] ? Object.keys(result.data[0]) : []))
+        setTotalPages(result.totalPages || 1)
+        setTotalRows(result.total || 0)
+        setDataSource(result.source || '')
+      } else {
+        setData([]); setColumns([]); setTotalRows(0)
       }
-    } catch (err) {
-      console.error(err);
+    } catch (e) {
+      setData([]); setColumns([])
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  useEffect(() => {
-    fetchData();
-  }, [selectedFile, page, searchQuery, columnFilters]);
-
-  // Reset pagination when file or search changes
-  useEffect(() => {
-    setPage(1);
-  }, [selectedFile, searchQuery, columnFilters]);
+  useEffect(() => { fetchData() }, [source, page, search, ano])
+  useEffect(() => { setPage(1) }, [source, search, ano])
 
   const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSearchQuery(tempSearch);
-    setColumnFilters(tempColumnFilters);
-  };
+    e.preventDefault()
+    setSearch(tempSearch)
+  }
+
+  const exportCSV = () => {
+    if (!data.length) return
+    const header = columns.join(',')
+    const rows = data.map(r => columns.map(c => `"${String(r[c] ?? '').replace(/"/g, '""')}"`).join(','))
+    const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url; a.download = `${source}-pagina${page}.csv`; a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const currentSource = SOURCES.find(s => s.id === source)
 
   return (
-    <main className="flex h-screen w-full bg-[#050505] text-slate-200 overflow-hidden font-sans">
-      {/* Sidebar Simples */}
-      <div className="w-[300px] border-r border-slate-800/50 flex flex-col bg-[#0a0a0a] z-20 shadow-2xl shrink-0">
-        <div className="p-6 border-b border-slate-800/50">
-          <button 
-            onClick={() => router.push('/')}
-            className="flex items-center gap-2 text-xs text-slate-500 hover:text-cyan-400 font-bold uppercase tracking-wider mb-6 transition-colors"
-          >
-            <ArrowLeft size={14} /> Voltar ao Painel
+    <div className="flex h-full w-full bg-[#050505] text-slate-200 overflow-hidden font-sans">
+
+      {/* Sidebar */}
+      <div className="w-[260px] border-r border-white/[0.04] flex flex-col bg-[#080808] shrink-0">
+        <div className="p-4 border-b border-white/[0.04]">
+          <button onClick={() => router.push('/')} className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-300 transition-colors mb-4">
+            <ArrowLeft size={14} /> Voltar ao painel
           </button>
-          
-          <div className="flex items-center gap-2 mb-1">
-            <FileText className="text-cyan-400 shrink-0" size={24} />
-            <h1 className="text-xl font-black tracking-tighter bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              RELATÓRIOS
-            </h1>
+          <div className="flex items-center gap-2">
+            <FileText size={16} className="text-purple-400" />
+            <div>
+              <div className="text-sm font-bold text-slate-200">Relatórios</div>
+              <div className="text-[10px] text-slate-600 uppercase tracking-wider">Dados TSE + Banco</div>
+            </div>
           </div>
-          <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">
-            Dados Brutos TSE
-          </p>
         </div>
 
-        <div className="flex-1 p-4 overflow-y-auto space-y-2 custom-scrollbar">
-          <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest px-2 mb-3">Bases de Dados</p>
-          {FILES.map(file => (
+        <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <div className="text-[10px] font-semibold text-slate-700 uppercase tracking-wider px-3 mb-2">Bases de dados</div>
+          {SOURCES.map(s => (
             <button
-              key={file}
-              onClick={() => {
-                 setSelectedFile(file);
-                 setTempSearch('');
-                 setSearchQuery('');
-                 setColumnFilters({});
-                 setTempColumnFilters({});
-              }}
-              className={`w-full text-left p-3 rounded-xl text-xs transition-all ${selectedFile === file ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 font-bold shadow-lg' : 'text-slate-400 hover:bg-slate-800/50 border border-transparent'}`}
+              key={s.id}
+              onClick={() => setSource(s.id)}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left
+                ${source === s.id
+                  ? 'bg-purple-500/15 text-purple-300 border border-purple-500/20'
+                  : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.03]'
+                }`}
             >
-              {file.replace(' Uberlandia.csv', '').replace('.csv', '')}
+              <span className="text-base">{s.icon}</span>
+              <div className="min-w-0">
+                <div className="text-sm font-medium truncate">{s.label}</div>
+                <div className="text-[10px] text-slate-600">{s.desc}</div>
+              </div>
             </button>
           ))}
-        </div>
+        </nav>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 bg-slate-900/50">
-        {/* Header / Barra de Pesquisa */}
-        <div className="p-6 border-b border-slate-800/50 bg-[#0a0a0a]/80 backdrop-blur-md flex items-center justify-between gap-4">
-          <div className="truncate">
-            <h2 className="text-lg font-black text-white truncate">{selectedFile}</h2>
-            <p className="text-[11px] text-slate-400 font-mono">
-              {loading ? 'Carregando...' : `${totalRows.toLocaleString('pt-BR')} registros encontrados`}
-            </p>
-          </div>
-          
-          <form onSubmit={handleSearch} className="flex max-w-md w-full gap-2 shrink-0">
-            <div className="relative flex-1 group">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 group-focus-within:text-cyan-400 transition-colors">
-                <Search size={16} />
+      {/* Main */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-white/[0.04] shrink-0">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xl">{currentSource?.icon}</span>
+                <h1 className="text-base font-semibold text-slate-200">{currentSource?.label}</h1>
+                {dataSource && (
+                  <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${dataSource === 'TSE' ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                    {dataSource === 'TSE' ? '📊 TSE' : '🗄️ Banco'}
+                  </span>
+                )}
               </div>
+              <p className="text-xs text-slate-600 mt-0.5">
+                {totalRows.toLocaleString('pt-BR')} registros encontrados
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              {/* Filtro de ano */}
+              {['candidatos','resultados_eleitorais','perfil_eleitorado','partidos'].includes(source) && (
+                <select
+                  value={ano}
+                  onChange={e => setAno(e.target.value)}
+                  className="bg-white/[0.03] border border-white/[0.06] text-slate-300 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-purple-500/30"
+                >
+                  <option value="">Todos os anos</option>
+                  {ANO_OPTS.filter(Boolean).map(a => <option key={a} value={a}>{a}</option>)}
+                </select>
+              )}
+              <button
+                onClick={exportCSV}
+                disabled={!data.length}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.03] border border-white/[0.06] text-slate-400 text-xs hover:text-slate-200 hover:border-purple-500/20 disabled:opacity-40 transition-all"
+              >
+                <Download size={13} /> Exportar página
+              </button>
+            </div>
+          </div>
+
+          {/* Busca */}
+          <form onSubmit={handleSearch} className="mt-3 flex gap-2">
+            <div className="relative flex-1">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
               <input
-                type="text"
-                placeholder="Pesquisar em todas as colunas..."
                 value={tempSearch}
-                onChange={(e) => setTempSearch(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-lg pl-10 py-2.5 focus:outline-none focus:border-cyan-500/50 transition-colors"
+                onChange={e => setTempSearch(e.target.value)}
+                placeholder={`Buscar em ${currentSource?.label?.toLowerCase()}...`}
+                className="w-full bg-white/[0.03] border border-white/[0.06] rounded-xl pl-8 pr-3 py-1.5 text-sm text-slate-200 placeholder:text-slate-700 focus:outline-none focus:border-purple-500/30 transition-colors"
               />
             </div>
-            <button type="submit" className="px-4 bg-slate-800 hover:bg-slate-700 text-white rounded-lg text-sm font-bold transition-colors">
+            <button type="submit" className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-medium rounded-xl transition-colors">
               Buscar
             </button>
+            {search && (
+              <button type="button" onClick={() => { setSearch(''); setTempSearch('') }} className="px-3 py-1.5 text-slate-500 hover:text-slate-300 text-xs transition-colors">
+                Limpar
+              </button>
+            )}
           </form>
         </div>
 
-        {/* Data Grid */}
-        <div className="flex-1 overflow-auto custom-scrollbar p-6">
+        {/* Tabela */}
+        <div className="flex-1 overflow-auto custom-scrollbar">
           {loading ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500 gap-4">
-              <BrainCircuit className="animate-spin text-cyan-500" size={40} />
-              <p className="text-sm font-mono tracking-widest uppercase">Processando Base de Dados...</p>
+            <div className="flex items-center justify-center h-full text-slate-600">
+              <Loader2 size={20} className="animate-spin mr-2" /> Carregando...
             </div>
           ) : data.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-500">
-              <FileText size={40} className="mb-4 opacity-50" />
-              <p className="text-sm">Nenhum registro encontrado para esta pesquisa.</p>
+            <div className="flex flex-col items-center justify-center h-full text-center p-8">
+              <Database size={32} className="text-slate-700 mb-3" />
+              <p className="text-sm text-slate-500 font-medium">Nenhum registro encontrado</p>
+              <p className="text-xs text-slate-700 mt-1">
+                {search ? 'Tente outro termo de busca' : 'Esta base ainda não tem dados importados'}
+              </p>
             </div>
           ) : (
-            <div className="bg-[#0a0a0a] rounded-xl border border-slate-800 shadow-2xl overflow-hidden">
-              <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
-                  <thead>
-                    <tr className="bg-slate-900 border-b border-slate-800">
-                      {columns.map(col => (
-                        <th key={col} className="px-4 py-3 align-top min-w-[150px]">
-                          <div className="font-bold text-slate-300 text-[11px] uppercase tracking-wider mb-2 truncate" title={col.replace(/_/g, ' ')}>
-                            {col.replace(/_/g, ' ')}
-                          </div>
-                          <input 
-                            type="text"
-                            placeholder="Filtrar..."
-                            value={tempColumnFilters[col] || ''}
-                            onChange={e => setTempColumnFilters(prev => ({...prev, [col]: e.target.value}))}
-                            onKeyDown={e => {
-                               if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  handleSearch(e as any);
-                               }
-                            }}
-                            className="w-full bg-[#050505] border border-slate-800 text-slate-200 text-xs rounded px-2 py-1.5 focus:outline-none focus:border-cyan-500/50 transition-colors placeholder:text-slate-600"
-                          />
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800/50">
-                    {data.map((row, idx) => (
-                      <tr key={idx} className="hover:bg-slate-800/30 transition-colors group">
-                        {columns.map(col => (
-                          <td key={col} className="px-4 py-2.5 text-slate-400 group-hover:text-slate-300">
-                            {row[col] || '-'}
-                          </td>
-                        ))}
-                      </tr>
+            <table className="w-full text-xs border-collapse">
+              <thead className="sticky top-0 z-10 bg-[#080808]">
+                <tr>
+                  {columns.map(col => (
+                    <th key={col} className="text-left px-4 py-2.5 text-[10px] font-semibold text-slate-600 uppercase tracking-wider border-b border-white/[0.04] whitespace-nowrap">
+                      {col.replace(/_/g, ' ')}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((row, i) => (
+                  <tr key={i} className="border-b border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                    {columns.map(col => (
+                      <td key={col} className="px-4 py-2 text-slate-400 max-w-[200px] truncate">
+                        {String(row[col] ?? '—')}
+                      </td>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
 
-        {/* Footer / Pagination */}
-        <div className="p-4 border-t border-slate-800/50 bg-[#0a0a0a] flex items-center justify-between shrink-0">
-          <p className="text-xs text-slate-500 font-mono">
-            Página <span className="text-white font-bold">{page}</span> de <span className="text-white font-bold">{totalPages || 1}</span>
-          </p>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={page === 1 || loading}
-              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <button
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages || loading}
-              className="p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:bg-slate-800 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <ChevronRight size={16} />
-            </button>
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div className="px-6 py-3 border-t border-white/[0.04] shrink-0 flex items-center justify-between">
+            <span className="text-xs text-slate-600">
+              Página {page} de {totalPages} · {totalRows.toLocaleString('pt-BR')} registros
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={page === 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] disabled:opacity-40 transition-all"
+              >
+                <ChevronLeft size={16} />
+              </button>
+              <span className="text-xs text-slate-400 min-w-[60px] text-center">{page} / {totalPages}</span>
+              <button
+                disabled={page === totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 hover:bg-white/[0.03] disabled:opacity-40 transition-all"
+              >
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
-    </main>
-  );
+    </div>
+  )
 }
