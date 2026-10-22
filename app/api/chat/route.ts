@@ -119,9 +119,9 @@ function buildBairroContext(ctx: any): string {
   return `══ ANÁLISE TERRITORIAL: ${(ctx.bairro || '').toUpperCase()} ══
 
 ▸ DADOS ELEITORAIS
-  Eleitores aptos: ${eleitoral.aptos?.toLocaleString('pt-BR') || ctx.populacao?.toLocaleString('pt-BR') || 'Não disponível'}
-  Total de votos válidos 2020: ${totalVotos2020.toLocaleString('pt-BR') || 'Não disponível'}
-  Total de votos válidos 2022: ${totalVotos2022.toLocaleString('pt-BR') || 'Não disponível'}
+  Eleitores que votam em locais dentro do bairro (TSE 2024): ${eleitoral.aptos?.toLocaleString('pt-BR') || ctx.populacao?.toLocaleString('pt-BR') || 'Nenhum local de votação no bairro — moradores votam em bairros vizinhos'}
+  Total de votos válidos 2020: ${totalVotos2020 ? totalVotos2020.toLocaleString('pt-BR') : 'Não disponível'}
+  Total de votos válidos 2022: ${totalVotos2022 ? totalVotos2022.toLocaleString('pt-BR') : 'Não disponível'}
   Abstenção estimada: ${eleitoral.abstencao_pct ? eleitoral.abstencao_pct + '%' : 'Não calculada'}
 
 ▸ TOP 5 CANDIDATOS 2020 (VEREANÇA)

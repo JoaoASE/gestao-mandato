@@ -53,6 +53,14 @@ const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
 
 
+// Mostra o número real ou um aviso claro — nunca "---" nem número inventado
+function ValorOuAviso({ valor, aviso, formato }: { valor: number | null | undefined; aviso: string; formato?: (v: number) => string }) {
+  if (valor === null || valor === undefined) {
+    return <span className="text-[11px] font-semibold text-slate-500 leading-tight">{aviso}</span>;
+  }
+  return <>{formato ? formato(valor) : valor.toLocaleString('pt-BR')}</>;
+}
+
 export default function Dashboard() {
   const [estatisticas, setEstatisticas] = useState<any[]>([]);
   const [statsSocial, setStatsSocial] = useState<any>({ totalAnalfabetos: 0 });
@@ -244,12 +252,16 @@ export default function Dashboard() {
 
       ? {
 
-          nome: selectedBairro.nome,
-
+          bairro: selectedBairro.nome,
+          populacao: selectedBairro.populacao,
           rendaMedia: selectedBairro.rendaMedia,
-
-          perfilVotacao: selectedBairro.perfilVotacao
-
+          sanitationCoverage: selectedBairro.sanitationCoverage,
+          transportLines: selectedBairro.transportLines,
+          leisureAreasCount: selectedBairro.leisureAreasCount,
+          securityIncidents: selectedBairro.securityIncidents,
+          healthFacilities: selectedBairro.healthFacilities,
+          demandas: selectedBairro.demandas,
+          historicoVotos: selectedBairro.historicoVotos,
         }
 
       : null;
@@ -454,12 +466,14 @@ export default function Dashboard() {
               {/* KPIs principais */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
-                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">População / Eleitores</p>
-                  <p className="text-lg font-bold text-white">{selectedBairro.populacao?.toLocaleString('pt-BR') || '---'}</p>
+                  <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">Eleitores que votam no bairro</p>
+                  <p className="text-lg font-bold text-white"><ValorOuAviso valor={selectedBairro.populacao} aviso="Moradores votam em bairros vizinhos" /></p>
+                  <p className="text-[9px] text-slate-600 mt-1">Fonte: TSE 2024 · locais de votação</p>
                 </div>
                 <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-800/80 hover:border-slate-700 transition-colors">
                   <p className="text-[10px] text-slate-500 uppercase font-black tracking-wider mb-1">Renda Média</p>
-                  <p className="text-lg font-bold text-green-400">R$ {selectedBairro.rendaMedia?.toLocaleString('pt-BR') || '---'}</p>
+                  <p className="text-lg font-bold text-green-400"><ValorOuAviso valor={selectedBairro.rendaMedia} aviso="Sem dado oficial por bairro" formato={(v) => 'R$ ' + v.toLocaleString('pt-BR')} /></p>
+                  {selectedBairro.rendaMedia != null && <p className="text-[9px] text-slate-600 mt-1">Fonte: IBGE Censo 2022</p>}
                 </div>
               </div>
 
@@ -475,28 +489,28 @@ export default function Dashboard() {
                     <TreePine size={16} className="text-green-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Praças/Lazer</p>
-                      <p className="text-sm font-black text-white">{selectedBairro.leisureAreasCount ?? '---'}</p>
+                      <p className="text-sm font-black text-white"><ValorOuAviso valor={selectedBairro.leisureAreasCount} aviso="Não mapeado" /></p>
                     </div>
                   </button>
                   <button onClick={() => setSelectedIndicator(selectedIndicator === 'roubos' ? null : 'roubos')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'roubos' ? 'border-red-500/50 shadow-[0_0_10px_rgba(239,68,68,0.15)]' : 'border-slate-800/50'}`}>
                     <ShieldAlert size={16} className="text-red-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Roubos/Ano</p>
-                      <p className="text-sm font-black text-white">{selectedBairro.securityIncidents ?? '---'}</p>
+                      <p className="text-sm font-black text-white"><ValorOuAviso valor={selectedBairro.securityIncidents} aviso="Sem dado oficial" /></p>
                     </div>
                   </button>
                   <button onClick={() => setSelectedIndicator(selectedIndicator === 'educacao' ? null : 'educacao')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'educacao' ? 'border-indigo-500/50 shadow-[0_0_10px_rgba(99,102,241,0.15)]' : 'border-slate-800/50'}`}>
                     <GraduationCap size={16} className="text-indigo-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Escolas/Educação</p>
-                      <p className="text-sm font-black text-white">{Math.floor(Math.random() * 8) + 2}</p>
+                      <p className="text-sm font-black text-white"><ValorOuAviso valor={null} aviso="Sem dado oficial" /></p>
                     </div>
                   </button>
                   <button onClick={() => setSelectedIndicator(selectedIndicator === 'onibus' ? null : 'onibus')} className={`flex items-center text-left gap-3 bg-slate-900/40 p-3 rounded-lg border hover:bg-slate-800 transition-colors cursor-pointer w-full ${selectedIndicator === 'onibus' ? 'border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.15)]' : 'border-slate-800/50'}`}>
                     <Bus size={16} className="text-yellow-500 shrink-0" />
                     <div>
                       <p className="text-[9px] text-slate-500 uppercase font-bold">Linhas de Ônibus</p>
-                      <p className="text-sm font-black text-white">{selectedBairro.transportLines ?? '---'}</p>
+                      <p className="text-sm font-black text-white"><ValorOuAviso valor={selectedBairro.transportLines} aviso="Sem dado oficial" /></p>
                     </div>
                   </button>
                 </div>
@@ -541,13 +555,8 @@ export default function Dashboard() {
                       <div>
                         <h4 className="text-xs text-indigo-400 font-bold mb-2 flex items-center gap-2"><GraduationCap size={12}/> Indicadores de Educação</h4>
                         <div className="space-y-3 mt-3">
-                          <div className="bg-slate-900/50 p-3 rounded border border-slate-800">
-                             <div className="flex justify-between text-xs mb-2 pb-2 border-b border-slate-800"><span className="text-slate-400">Escolas Municipais</span><span className="font-bold text-white">{Math.floor(Math.random() * 4) + 1}</span></div>
-                             <div className="flex justify-between text-xs mb-2 pb-2 border-b border-slate-800"><span className="text-slate-400">Escolas Estaduais</span><span className="font-bold text-white">{Math.floor(Math.random() * 3) + 1}</span></div>
-                             <div className="flex justify-between text-xs"><span className="text-slate-400">Rede Particular</span><span className="font-bold text-white">{Math.floor(Math.random() * 5)}</span></div>
-                          </div>
-                          <p className="text-[10px] text-slate-500 flex items-center gap-1 bg-slate-900/30 p-2 rounded border border-slate-800">
-                             <Activity size={10} className="text-indigo-400"/> Vagas em creche possuem déficit estimado de 15% neste setor.
+                          <p className="text-xs text-slate-400 bg-slate-900/50 p-3 rounded border border-slate-800">
+                            Ainda não há dado oficial de escolas e vagas em creche por bairro. Fonte prevista: Censo Escolar (INEP) e Secretaria Municipal de Educação.
                           </p>
                         </div>
                       </div>

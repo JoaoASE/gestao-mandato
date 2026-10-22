@@ -14,9 +14,8 @@ export async function GET() {
     const stats = neighborhoods.map((n: any) => ({
       id: n.id,
       nomeBairro: n.name,
-      rendaMedia: n.averageIncome || 0,
-      perfilVotacao: (n.totalVoters || 0) > 5000 ? "Base" : "Indeciso",
-      populacao: n.totalVoters || 0,
+      rendaMedia: n.averageIncome ?? null,   // null = sem dado oficial (não é zero)
+      populacao: n.totalVoters ?? null,      // null = nenhum local de votação no bairro
       demandas: n.CitizenDemand,
       leisureAreasCount: n.leisureAreasCount,
       securityIncidents: n.securityIncidents,
