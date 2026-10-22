@@ -1,0 +1,26 @@
+{
+  "populacaoTotal": "713224",
+  "homens": "343965",
+  "mulheres": "369259",
+  "raca": {
+    "Branca": 319667,
+    "Parda": 308184,
+    "Preta": 65688,
+    "Amarela": 14122,
+    "Indígena": 5563
+  },
+  "racaFonte": "proporcoes_censo2022_udi",
+  "totalDomicilios": null,
+  "domiciliosComEsgoto": null,
+  "pctEsgoto": "91.3",
+  "saneamentoFonte": "censo2022_publicado",
+  "pibPerCapita": "43030885",
+  "rendaMedia": "3247",
+  "rendaFonte": "pnad_referencia_2023",
+  "taxaAlfabetizacao": "96.8",
+  "alfabFonte": "censo2022_publicado",
+  "mortalidadeInfantil": "7.8",
+  "mortalidadeFonte": "svs_ms_2022",
+  "gini": "0.461",
+  "giniFonte": "censo2022_publicado"
+}

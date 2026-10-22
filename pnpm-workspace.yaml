@@ -1,4 +1,6 @@
 allowBuilds:
-  '@prisma/client': set this to true or false
-  '@prisma/engines': set this to true or false
-  prisma: set this to true or false
+  '@clerk/shared': true
+  '@prisma/client': true
+  '@prisma/engines': true
+  prisma: true
+  sharp: true
