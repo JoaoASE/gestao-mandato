@@ -78,7 +78,7 @@ export async function GET(request: Request) {
           bairro: f.Neighborhood.name,
           latitude: f.latitude,
           longitude: f.longitude,
-          address: f.address,
+
           currentQueueSize: f.currentQueueSize,
           averageWaitTime: f.averageWaitTime,
         });
